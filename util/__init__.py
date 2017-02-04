@@ -31,6 +31,9 @@ class Util:
         quadrant_capture_count = int(settings["quadrant_capture_count"])
         quadrant_number = int(settings["quadrant_number"])
 
+        if (quadrant_capture_count == 0):
+            return window_size
+
         # Find a more elegant way to do this
         if quadrant_capture_count == 1:
             # User wants to capture 1 of the 4 quadrants

@@ -4,6 +4,7 @@ import os
 import itertools
 from util import Util
 from widthwatcher import WidthWatcher
+from cdwatcher import CDWatcher
 import yaml
 
 sys.path.append(
@@ -12,7 +13,7 @@ sys.path.append(
 
 def main():
     """Main entrypoint for script."""
-    config_file = open('lifelights.yml')
+    config_file = open('lifelights_osc.yml')
     settings = yaml.safe_load(config_file)
     config_file.close()
 
@@ -25,6 +26,7 @@ def main():
     spinner = itertools.cycle(['-', '/', '|', '\\'])
 
     watcher_list = [WidthWatcher(w) for w in settings["watchers"]]
+    cd_watcher_list = [CDWatcher(w) for w in settings["cd_watchers"]]
 
     window = Util.find_window_by_title(settings["window_title"])
 
@@ -50,6 +52,10 @@ def main():
             continue
 
         for watch in watcher_list:
+            watch.scan(screen)
+            watch.process()
+
+        for watch in cd_watcher_list:
             watch.scan(screen)
             watch.process()
 

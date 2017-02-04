@@ -1,8 +1,8 @@
 ---
 window_title: Heroes of the Storm
 scan_interval: 0.1
-quadrant_capture_count: 1
-quadrant_number: 3
+quadrant_capture_count: 0
+quadrant_number: 0
 watchers:
   - name: 'HP'
     min_width: 20
@@ -29,6 +29,67 @@ watchers:
 #        entity_id: 'light.office_2'
 #        rgb_color: 'RGB_PLACEHOLDER'
 #        brightness: 255
+cd_watchers:
+  - name: 'Ability1'
+    target_region:
+      x: 1013
+      y: 1350
+      width: 81
+      height: 49
+    tolerance: 0.15
+    min_threshold: 55
+    requests:
+     - endpoint: 'localhost'
+       port: 7110
+       method: OSC
+       delay: 0.01
+       payloads:
+         status: IS_ON_PLACEHOLDER
+  - name: 'Ability2'
+    target_region:
+      x: 1126
+      y: 1350
+      width: 81
+      height: 49
+    tolerance: 0.15
+    min_threshold: 55
+    requests:
+     - endpoint: 'localhost'
+       port: 7110
+       method: OSC
+       delay: 0.01
+       payloads:
+         status: IS_ON_PLACEHOLDER
+  - name: 'Ability3'
+    target_region:
+      x: 1239
+      y: 1350
+      width: 81
+      height: 49
+    tolerance: 0.15
+    min_threshold: 55
+    requests:
+     - endpoint: 'localhost'
+       port: 7110
+       method: OSC
+       delay: 0.01
+       payloads:
+         status: IS_ON_PLACEHOLDER
+  - name: 'Ability4'
+    target_region:
+      x: 1353
+      y: 1350
+      width: 81
+      height: 49
+    tolerance: 0.15
+    min_threshold: 55
+    requests:
+     - endpoint: 'localhost'
+       port: 7110
+       method: OSC
+       delay: 0.01
+       payloads:
+         status: IS_ON_PLACEHOLDER
   # - name: 'Respawn time'
   #   min_width: 50
   #   change_threshold: 25
