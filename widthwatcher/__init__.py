@@ -18,8 +18,14 @@ class WidthWatcher:
                               watcher_conf["color_lower_limit"]["red"])
 
         self._max_width = 1.0
+        self._max_height = 1.0
         self._width = 0.0
         self._osc_enabled = False
+
+        self._height = 0.0
+        self._barX = 0.0
+        self._barY = 0.0
+        self._current_percentage = 0.0
 
         self._last_percentage = 0.0
 
@@ -28,30 +34,49 @@ class WidthWatcher:
         import cv2
         image_mask = cv2.inRange(screen, self._lower_bounds,
                                  self._upper_bounds)
+
         cnts = cv2.findContours(image_mask.copy(), cv2.RETR_EXTERNAL,
                                 cv2.CHAIN_APPROX_SIMPLE)[-2]
 
-        if len(cnts) > 0:
-            max_cnt = max(cnts, key=cv2.contourArea)
-            #x, y, w, h = cv2.boundingRect(max_cnt)
-            _, _, width, _ = cv2.boundingRect(max_cnt)
+        # determine which contour is furthest right (for now we assume all bars extend to the right)
+        maxX = 0.0
+        if (len(cnts) == 0):
+            self._current_percentage = 0
 
-            if (width - int(self._settings["min_width"])) >= 0:
-                if self._max_width < width:
-                    self._max_width = float(width)
+        for cnt in cnts:
+            cx, cy, cw, ch = cv2.boundingRect(cnt)
+
+            if (cw - int(self._settings["min_width"])) >= 0:
+                if self._max_width < cw:
+                    self._max_width = float(cw)
+                    self._max_height = float(ch)
+                    self._barX = float(cx)
+                    self._barY = float(cy)
                     Util.log("Max %s updated %d" %
-                             (self._settings["name"], width))
+                             (self._settings["name"], cw))
 
-                self._width = float(width)
+            # debug
+            #cv2.rectangle(screen, (int(self._barX),int(self._barY)),(int(self._barX+self._max_width),int(self._barY+self._max_height)),(0,255,0),2)
+            #cv2.rectangle(screen, (cx,cy), (cx + cw, cy + ch), (0,0,255), 2)
+            #cv2.imshow("bar debug", screen)
+            #cv2.waitKey()
+            #quit()
 
-            # uncomment for debugging purposes
-            # cv2.rectangle(screen,(x,y),(x+w,y+h),(0,255,0),2)
-            # cv2.imshow("bingo!", screen)
-            # cv2.waitKey(0)
-            # quit()
+            if (cx + cw > maxX):
+                rightX = cx + cw
+
+                # containment check
+                if (self._barX <= rightX <= self._barX + self._max_width and self._barY <= cy <= self._barY + self._max_height):
+                    maxX = float(rightX)
+
+                    # update stats
+                    self._current_percentage = round((maxX - self._barX) / self._max_width, 3)
 
         else:
             self._width = 0.0
+
+        # detailed debug, may only want this to be uncommented if you really like logs
+        #Util.log("Percentage calculated as %d / %d (%f)" % (maxX - self._barX, self._max_width, self._current_percentage))
 
     def sendOSC(self, address, port, msg):
         if not self._osc_enabled:
@@ -68,7 +93,7 @@ class WidthWatcher:
         """Execute RESTful API calls based on the results of an image scan."""
         import copy
 
-        percent = round((self._width * 1.0) / (self._max_width * 1.0), 2)
+        percent = self._current_percentage # round((self._width * 1.0) / (self._max_width * 1.0), 2)
 
         if self._last_percentage == percent:
             return
